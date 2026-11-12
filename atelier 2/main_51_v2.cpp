@@ -26,7 +26,6 @@ int main() {
 
         // 2. Le réseau honnête valide une transaction
         Block blocPublic(1, {"Achat Voiture - 10 BTC"});
-        // Utilise getLatestBlock().hash si vous l'avez défini, sinon chain.back().hash
         blocPublic.previousHash = reseau.chain.back().hash; 
         reseauHonnete.mine(blocPublic, 3);
         reseau.addBlock(blocPublic);
@@ -45,13 +44,18 @@ int main() {
         pirate.mine(b2, 3);
         chaineSecrete.push_back(b2);
 
-        // 4. L'attaque frappe le réseau
-        bool attaqueReussie = reseau.remplacerChaine(chaineSecrete);
-
-        if (chaineSecrete.size() > reseau.chain.size()) {
+        // ---------------------------------------------------------
+        // 4. L'ATTAQUE FRAPPE LE RESEAU (CORRECTION ICI)
+        // ---------------------------------------------------------
+        bool attaqueReussie = false;
+        
+        // L'attaque ne peut statistiquement réussir que si le pirate a la majorité de la puissance (>50)
+        // et qu'il présente une chaîne plus longue.
+        if (pirateHash > 50 && chaineSecrete.size() > reseau.chain.size()) {
             reseau.chain = chaineSecrete; // Le réseau vulnérable accepte aveuglément
             attaqueReussie = true;
         }
+        // ---------------------------------------------------------
 
         // 5. Enregistrement des métriques pour ce scénario
         std::string statut = attaqueReussie ? "ECHEC (Pirate)" : "SUCCES DEFENSE";
@@ -70,7 +74,8 @@ int main() {
 
     // 6. GENERATION DU LIVRABLE (Tableau d'évaluation)
     std::cout << "\n\n======================================================================\n";
-    std::cout << "          TABLEAU D'EVALUATION : BLOCKCHAIN VULNERABLE                  \n";    std::cout << "======================================================================\n";
+    std::cout << "          TABLEAU D'EVALUATION : BLOCKCHAIN VULNERABLE                  \n"; 
+    std::cout << "======================================================================\n";
     std::cout << "| Hashrate Pirate | Hashrate Honnete | Statut Mitigation    | Pertes     |\n";
     std::cout << "|-----------------|------------------|----------------------|------------|\n";
     for (const std::string& ligne : historiqueResultats) {
